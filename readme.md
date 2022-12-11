@@ -2,7 +2,6 @@
 IoT device to take a picture and send it to the server with WiFi secure connection. 
 Produced for the IoT Security course of Computer Science at University of Salerno
 
----
 ## Generate certificates
 Creating a private key
 ```
@@ -39,3 +38,7 @@ openssl x509 -in mycert.crt -out mycert.pem -outform PEM
 Notes: CN and DNS.1 is the hostname that must be set in the client
 
 Link:[Creating a Self-Signed Certificate With OpenSSL](https://www.baeldung.com/openssl-self-signed-cert)
+
+## Authors
+- Mattia D'Argenio [mattiadarg](https://github.com/mattiadarg)
+- Gagliarde Nicolapio [GagliardeNicolapio](https://github.com/GagliardeNicolapio/)
