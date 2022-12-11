@@ -54,7 +54,7 @@ void ssl_init(sslclient_context *ssl_client)
 }
 
 
-int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t port, int timeout, const char *rootCABuff, bool useRootCABundle, const char *cli_cert, const char *cli_key, const char *pskIdent, const char *psKey, bool insecure, const char **alpn_protos)
+int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t port, int timeout, const char *rootCABuff, bool useRootCABundle, const char *cli_cert, const char *cli_key, const char *pskIdent, const char *psKey, bool insecure, const char **alpn_protos, const char* hostnameCN)
 {
     char buf[512];
     int ret, flags;
@@ -260,7 +260,7 @@ int start_ssl_client(sslclient_context *ssl_client, const char *host, uint32_t p
     //istruzione originale: if((ret = mbedtls_ssl_set_hostname(&ssl_client->ssl_ctx, host)) != 0)
     //io al posto di host ho messo "example.org"
     const char *hostDIprova = "example.org";
-    if((ret = mbedtls_ssl_set_hostname(&ssl_client->ssl_ctx, hostDIprova)) != 0){
+    if((ret = mbedtls_ssl_set_hostname(&ssl_client->ssl_ctx, hostnameCN)) != 0){
         return handle_error(ret);
     }
 

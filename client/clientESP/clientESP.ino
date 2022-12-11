@@ -8,8 +8,8 @@
 
 #include "WiFiClientSecure.h"
 
-const char* ssid     = "";     // your network SSID (name of wifi network)
-const char* password = ""; // your network password
+const char* ssid     = "GLC_WiFi_Nik";     // your network SSID (name of wifi network)
+const char* password = "12345@678"; // your network password
 
 const char*  server = "192.168.1.250";  // Server URL
 
@@ -43,8 +43,8 @@ const char* nodesdomainpem_test_root_ca= \
 //const char* test_client_key = "";   //to verify the client
 //const char* test_client_cert = "";  //to verify the client
 
-
-WiFiClientSecure client;
+const char* hostname = "example.org";
+WiFiClientSecure client(hostname);
 
 void setup() {
   //Initialize serial and wait for port to open:

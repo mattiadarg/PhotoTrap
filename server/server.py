@@ -6,7 +6,7 @@ if __name__ == '__main__':
     port = 6156
     context = SSLContext(PROTOCOL_TLS_SERVER)
 
-    context.load_cert_chain("./certificatiBaeldebung/nodes/domain.pem", "./certificatiBaeldebung/nodes/domainK.pem")
+    context.load_cert_chain("../certs/domain.pem", "../certs/domainK.pem")
 
     with socket(AF_INET, SOCK_STREAM) as server:
         server.bind((ip, port))

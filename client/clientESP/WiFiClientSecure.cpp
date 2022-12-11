@@ -29,8 +29,11 @@
 #undef read
 
 
-WiFiClientSecure::WiFiClientSecure()
+
+WiFiClientSecure::WiFiClientSecure(const char* hostname)
 {
+    _hostname = hostname;
+
     _connected = false;
     _timeout = 30000; // Same default as ssl_client
 
@@ -129,7 +132,7 @@ int WiFiClientSecure::connect(IPAddress ip, uint16_t port, const char *CA_cert, 
 
 int WiFiClientSecure::connect(const char *host, uint16_t port, const char *CA_cert, const char *cert, const char *private_key)
 {
-    int ret = start_ssl_client(sslclient, host, port, _timeout, CA_cert, _use_ca_bundle, cert, private_key, NULL, NULL, _use_insecure, _alpn_protos);
+    int ret = start_ssl_client(sslclient, host, port, _timeout, CA_cert, _use_ca_bundle, cert, private_key, NULL, NULL, _use_insecure, _alpn_protos, _hostname);
     _lastError = ret;
     if (ret < 0) {
         log_e("start_ssl_client: %d", ret);
@@ -146,7 +149,7 @@ int WiFiClientSecure::connect(IPAddress ip, uint16_t port, const char *pskIdent,
 
 int WiFiClientSecure::connect(const char *host, uint16_t port, const char *pskIdent, const char *psKey) {
     log_v("start_ssl_client with PSK");
-    int ret = start_ssl_client(sslclient, host, port, _timeout, NULL, false, NULL, NULL, pskIdent, psKey, _use_insecure, _alpn_protos);
+    int ret = start_ssl_client(sslclient, host, port, _timeout, NULL, false, NULL, NULL, pskIdent, psKey, _use_insecure, _alpn_protos, _hostname);
     _lastError = ret;
     if (ret < 0) {
         log_e("start_ssl_client: %d", ret);

@@ -44,7 +44,7 @@ protected:
 
 public:
     WiFiClientSecure *next;
-    WiFiClientSecure();
+    WiFiClientSecure(const char* hostname);
     WiFiClientSecure(int socket);
     ~WiFiClientSecure();
     int connect(IPAddress ip, uint16_t port);
@@ -109,6 +109,9 @@ public:
 
 private:
     char *_streamLoad(Stream& stream, size_t size);
+
+    //hostname
+    const char* _hostname;
 
     //friend class WiFiServer;
     using Print::write;
