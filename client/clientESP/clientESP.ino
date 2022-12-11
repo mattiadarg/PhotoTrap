@@ -6,12 +6,19 @@
   2017 - Evandro Copercini - Apache 2.0 License.
 */
 
+#include "esp_camera.h"
+#include "Arduino.h"
+#include "soc/soc.h"           // Disable brownour problems
+#include "soc/rtc_cntl_reg.h"  // Disable brownour problems
+#include "driver/rtc_io.h"
+
+
 #include "WiFiClientSecure.h"
 
-const char* ssid     = "GLC_WiFi_Nik";     // your network SSID (name of wifi network)
-const char* password = "12345@678"; // your network password
+const char* ssid     = "LAPTOP-QF1B0J7V 3878";     // your network SSID (name of wifi network)
+const char* password = "a(587J25"; // your network password
 
-const char*  server = "192.168.1.250";  // Server URL
+const char*  server = "172.19.216.6";  // Server URL
 
 const char* nodesdomainpem_test_root_ca= \
      "-----BEGIN CERTIFICATE-----\n" \
@@ -49,16 +56,17 @@ WiFiClientSecure client(hostname);
 void setup() {
   //Initialize serial and wait for port to open:
   Serial.begin(115200);
+
+  
   delay(100);
 
   Serial.print("Attempting to connect to SSID: ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
 
-  // attempt to connect to Wifi network:
+
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
-    // wait 1 second for re-trying
     delay(1000);
   }
 
@@ -78,16 +86,19 @@ void setup() {
     Serial.println("Connection failed!");
   else {
     Serial.println("Connected to server!");
-    client.println("CIAO DA ESP :)");
-
-
-    while (client.connected()) {
+    
+    camera_fb_t * fb = setupCamera();
+    client.write(fb->buf,fb->len);
+    esp_camera_fb_return(fb);
+    
+    /*while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
         Serial.println("headers received");
         break;
       }
-    }
+    }*/
+  
     // if there are incoming bytes available
     // from the server, read them and print them:
     while (client.available()) {
