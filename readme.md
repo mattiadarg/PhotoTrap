@@ -37,4 +37,5 @@ openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in domain.csr -out domain.cr
 openssl x509 -in mycert.crt -out mycert.pem -outform PEM
 ```
 Notes: CN and DNS.1 is the hostname that must be set in the client
+
 Link:[Creating a Self-Signed Certificate With OpenSSL](https://www.baeldung.com/openssl-self-signed-cert)
