@@ -1,8 +1,9 @@
+
 from socket import socket, AF_INET, SOCK_STREAM
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
 
 if __name__ == '__main__':
-    ip = "192.168.1.250"
+    ip = "192.168.137.1"
     port = 6156
     context = SSLContext(PROTOCOL_TLS_SERVER)
 
@@ -14,10 +15,24 @@ if __name__ == '__main__':
         with context.wrap_socket(server, server_side=True) as tls:
             connection, address = tls.accept()
             print(f'Connected by {address}\n')
+            fbLen = int(connection.recv(6).decode("utf-8"))
+            print(fbLen)
 
-            data = connection.recv(1024)
-            print(f'Client Says: {data}')
+            # remove \r\n
+            connection.recv(2)
 
-            connection.sendall(b"You're welcome")
+            data = bytearray()
+            maxChunk = 16384
+            numOfChunks = int(fbLen / maxChunk)
+            for i in range(0, numOfChunks + 1):
+                data.extend(connection.recv(maxChunk))
 
-           # socket.close(self=True)
+            print(data)
+            print(len(data))
+            newFile = open("filename.jpg", "wb")
+            newFile.write(data)
+            newFile.flush()
+            newFile.close()
+
+            connection.close()
+            print('client disconnected')

@@ -1,5 +1,3 @@
-
-
 // Pin definition for CAMERA_MODEL_AI_THINKER
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
@@ -19,11 +17,10 @@
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-int pictureNumber = 0;
+camera_config_t config;
 
-camera_fb_t* setupCamera(){
+void setupCamera(){
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-  camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -54,31 +51,23 @@ camera_fb_t* setupCamera(){
     config.jpeg_quality = 12;
     config.fb_count = 1;
   }
-  
-  // Init Camera
+}
+
+void startCamera(){
   Serial.println("start init camera");
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
-    return NULL;
+    return;
   }
   Serial.println("init camera done");
-  camera_fb_t * fb = NULL;
-  
-  // Take Picture with Camera
-  fb = esp_camera_fb_get();  
+}
+
+camera_fb_t * takePicture(){
+  camera_fb_t * fb = esp_camera_fb_get(); 
   if(!fb) {
     Serial.println("Camera capture failed");
     return NULL;
   }
-  
-  //file.write(fb->buf, fb->len); // payload (image), payload length
-  Serial.println("FOTO ");
-  Serial.print("SIZE fb->len:");
-  Serial.println(fb->len);
-
-  //for(int i=0; i<fb->len; i++)
-   // Serial.print(fb->buf[i]);
-  
   return fb;
 }
