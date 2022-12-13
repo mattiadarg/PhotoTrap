@@ -8,6 +8,8 @@
 #include "soc/soc.h"           //Disable brownour problems
 #include "soc/rtc_cntl_reg.h"  //Disable brownour problems
 #include "driver/rtc_io.h"
+#include "Preferences.h"
+#include "AESLib.h"
 
 
 #include "WiFiClientSecure.h"
@@ -52,7 +54,22 @@ WiFiClientSecure client(hostname);
 void setup() {
   Serial.begin(115200);
   delay(100);
+  
+  Preferences preferences;
+  
+  String password_ct;
 
+  uint8_t key[] = {20,81,93,30,95,47,94,77,80,26,68,9,51,12,22,43};
+  preferences.begin("credentials", false);
+ 
+  password_ct = preferences.getString(ssid, "");
+
+  password = aes128_dec_single(key, password_ct);
+
+  if (password_ct == ""){
+    Serial.println("No values saved for ssid or password");
+  }
+  else {
   //WiFi Connect
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
