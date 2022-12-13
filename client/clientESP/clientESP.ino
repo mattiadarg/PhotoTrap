@@ -144,7 +144,8 @@ SPIFFS.begin(true);
     
     setupCamera();
     startCamera();
-    camera_fb_t * fb = takePicture(false);
+    
+    camera_fb_t * fb = takePicture(true);
 
     Serial.println("LEN:");
     Serial.println(fb->len);
@@ -158,14 +159,37 @@ SPIFFS.begin(true);
          size_t test = client.write(&fb->buf[i*16384], maxChunk);
     }
    
-    delay(9000);
+    //delay(9000);
     
     esp_camera_fb_return(fb);
-  
-    Serial.println("Disconnecting...");
+  Serial.println("Disconnecting...");
     client.stop();
-  
+
+    delay(3000);
+client.connect(server, 6156);
+  camera_fb_t * fb2 = takePicture(true);
+
+    Serial.println("LEN:");
+    Serial.println(fb2->len);
+    client.println(fb2->len);
+   
+
+
+     maxChunk = 16384;// 16384 = 2^14 roba a che fare con pacchetti SSL, TCP, BHOOO
+     numOfChunks = (int) fb2->len/maxChunk;
+    for(int i=0; i<numOfChunks+1; i++){
+         size_t test = client.write(&fb2->buf[i*16384], maxChunk);
+    }
+   
+    //delay(9000);
     
+    esp_camera_fb_return(fb2);
+
+  
+  
+  
+      Serial.println("Disconnecting...");
+    client.stop();
 
  
     
