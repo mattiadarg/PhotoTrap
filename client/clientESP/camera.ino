@@ -17,9 +17,12 @@
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
+#define LED_BUILTIN 4
+
 camera_config_t config;
 
 void setupCamera(){
+  pinMode (LED_BUILTIN, OUTPUT);
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -63,11 +66,19 @@ void startCamera(){
   Serial.println("init camera done");
 }
 
-camera_fb_t * takePicture(){
+camera_fb_t * takePicture(bool flash){
+  if(flash){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+  }
+  
   camera_fb_t * fb = esp_camera_fb_get(); 
   if(!fb) {
     Serial.println("Camera capture failed");
     return NULL;
   }
+
+  if(flash)
+    digitalWrite(LED_BUILTIN, LOW);
   return fb;
 }

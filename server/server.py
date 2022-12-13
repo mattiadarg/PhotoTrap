@@ -1,4 +1,3 @@
-
 from socket import socket, AF_INET, SOCK_STREAM
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
 
@@ -8,6 +7,9 @@ if __name__ == '__main__':
     context = SSLContext(PROTOCOL_TLS_SERVER)
 
     context.load_cert_chain("../certs/domain.pem", "../certs/domainK.pem")
+
+    # client authentication
+    context.load_verify_locations("../certs/client/domainClient.pem")
 
     with socket(AF_INET, SOCK_STREAM) as server:
         server.bind((ip, port))
