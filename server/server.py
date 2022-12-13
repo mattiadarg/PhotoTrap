@@ -1,5 +1,27 @@
 from socket import socket, AF_INET, SOCK_STREAM
+import threading
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
+from tkinter import *
+from PIL import ImageTk, Image
+
+
+
+def createWindow():
+    root = Tk()
+
+    img = ImageTk.PhotoImage(Image.open("filename.jpg"))
+    panel = Label(root, image=img)
+    panel.pack(side="bottom", fill="both", expand="yes")
+
+    def callback():
+        print("sto nella callback")
+        img2 = ImageTk.PhotoImage(Image.open("filename.jpg"))
+        panel.configure(image=img2)
+        panel.image = img2
+        threading.Timer(5.0, callback).start()
+
+    threading.Timer(5.0, callback).start()
+    root.mainloop()
 
 if __name__ == '__main__':
     ip = "192.168.137.1"
@@ -38,3 +60,4 @@ if __name__ == '__main__':
 
             connection.close()
             print('client disconnected')
+            createWindow()

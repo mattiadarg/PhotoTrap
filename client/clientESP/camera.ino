@@ -46,7 +46,7 @@ void setupCamera(){
   config.pixel_format = PIXFORMAT_JPEG; 
 
   if(psramFound()){
-    config.frame_size = FRAMESIZE_UXGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
+    config.frame_size = FRAMESIZE_SVGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
     config.jpeg_quality = 10;
     config.fb_count = 2;
   } else {
@@ -54,6 +54,8 @@ void setupCamera(){
     config.jpeg_quality = 12;
     config.fb_count = 1;
   }
+
+
 }
 
 void startCamera(){
