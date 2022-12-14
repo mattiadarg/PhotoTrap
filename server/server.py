@@ -11,23 +11,26 @@ Time of update: 5sec
 """
 
 
+def callback(panel):
+    print("sto nella callback")
+    img2 = ImageTk.PhotoImage(Image.open("image.jpg"))
+    panel.configure(image=img2)
+    panel.image = img2
+    threading.Timer(5.0, callback, [panel]).start()
+
+
 def createWindow():
-    root = Tk()
-
-    img = ImageTk.PhotoImage(Image.open("image.jpg"))
-    panel = Label(root, image=img)
-    panel.pack(side="bottom", fill="both", expand="yes")
-
-    def callback(panel):
-        print("sto nella callback")
-        img2 = ImageTk.PhotoImage(Image.open("image.jpg"))
-        panel.configure(image=img2)
-        panel.image = img2
+    try:
+        root = Tk()
+        img = ImageTk.PhotoImage(Image.open("image.jpg"))
+        panel = Label(root, image=img)
+        panel.image = img
+        panel.pack(side="bottom", fill="both", expand="yes")
         threading.Timer(5.0, callback, [panel]).start()
-
-    threading.Timer(5.0, callback,[panel]).start()
-    root.mainloop()
-
+        root.mainloop()
+    except Exception as e:
+        print("Thread killed")
+    # qui c'era callback
 
 """
 Writes data in image.jpg
@@ -35,7 +38,6 @@ Writes data in image.jpg
 
 
 def writeImage(data):
-    current_time = datetime.now().strftime("%H_%M_%S")
     newFile = open("image.jpg", "wb")
     newFile.write(data)
     newFile.flush()
@@ -51,16 +53,12 @@ def readImage(tls):
     # remove \r\n
     connection.recv(2)
 
-    # fare la divisione per capire il numero di cunck di 16384 byte
-    # e fare il mod 16384 per capire i byte finali
     data = bytearray()
     maxChunk = 16384
     numOfChunks = int(fbLen / maxChunk)
     for i in range(0, numOfChunks + 1):
         data.extend(connection.recv(maxChunk))
 
-    print(data)
-    print(len(data))
     writeImage(data)
     data.clear()
     connection.close()
