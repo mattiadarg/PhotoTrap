@@ -9,14 +9,13 @@
 #include "soc/soc.h"           //Disable brownour problems
 #include "soc/rtc_cntl_reg.h"  //Disable brownour problems
 #include "driver/rtc_io.h"
-
-#include "Cipher.h"
-
 #include "WiFiClientSecure.h"
-#include "SPIFFSTest.h"
 
-const char* ssid     = "LAPTOP-QF1B0J7V 3878";     //name of wifi network
-
+void writePasswd(const char* plainPasswd);
+String getWiFiPasswd();
+void setupCamera();
+void startCamera();
+camera_fb_t * takePicture(bool flash);
 
 //server cert
 const char* nodesdomainpem_test_root_ca= \
@@ -102,42 +101,34 @@ const char* test_client_cert = \
 "cNxNs1NZ0k5xhUuS/pCbQ/nSVJauUKB54n4=\n" \
 "-----END CERTIFICATE-----\n";
 
+const char* ssid     = "LAPTOP-QF1B0J7V 3878";     //name of wifi network
 const char* hostname = "example.org"; //hostname for certs Common Name 
 WiFiClientSecure client(hostname);
-#include "Cipher.h"
+
 void setup() {
   Serial.begin(115200);
   delay(100);
-  Cipher* cipher = new Cipher();
-    CSPIFFS mSpiffs;
-SPIFFS.begin(true);
-    mSpiffs.writeFile(SPIFFS, "/test.txt", cipher->encryptString("a(587J25") );
-    String decipheredString = cipher->decryptString(mSpiffs.getFile(SPIFFS, "/test.txt"));
-    Serial.println("lllllllllllllllllllllllll: ");
-    Serial.println(decipheredString);
+
+  /*Da chiamare se la password del wifi cambia*/
+  //writePasswd("a(587J25");
+  
   //WiFi Connect
-  WiFi.begin(ssid,decipheredString.c_str());
+  String passwd = getWiFiPasswd();
+  WiFi.begin(ssid,passwd.c_str());
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(1000);
   }
   Serial.println("Connected to WiFi");
 
-  IPAddress  server = WiFi.gatewayIP();  // Server IP
-
-  //test mac address
-  String mac = WiFi.macAddress();
-  Serial.println("MAC: ");
-  Serial.println(mac);
-
+ 
   //Authentication
   client.setCACert(nodesdomainpem_test_root_ca);
   client.setCertificate(test_client_cert); // for client verification
   client.setPrivateKey(test_client_key);  // for client verification
 
 
-
-  if (!client.connect(server, 6156))
+  if (!client.connect(WiFi.gatewayIP(), 6156))
     Serial.println("Connection to server failed!");
   else {
     Serial.println("Connected to server!");
@@ -145,10 +136,8 @@ SPIFFS.begin(true);
     setupCamera();
     startCamera();
     
-    camera_fb_t * fb = takePicture(true);
+    camera_fb_t * fb = takePicture(false);
 
-    Serial.println("LEN:");
-    Serial.println(fb->len);
     client.println(fb->len);
    
 
@@ -162,37 +151,38 @@ SPIFFS.begin(true);
     //delay(9000);
     
     esp_camera_fb_return(fb);
-  Serial.println("Disconnecting...");
+    Serial.println("Disconnecting...");
     client.stop();
+  }
+  delay(10000);
 
-    delay(3000);
-client.connect(server, 6156);
-  camera_fb_t * fb2 = takePicture(true);
+  for(int i=0; i<10; i++){
+    delay(2000);
+  if (!client.connect(WiFi.gatewayIP(), 6156))
+    Serial.println("Connection to server failed!");
+  else {
+    Serial.println("Connected to server!");
+    
+   
+    camera_fb_t * fb = takePicture(false);
 
-    Serial.println("LEN:");
-    Serial.println(fb2->len);
-    client.println(fb2->len);
+    client.println(fb->len);
    
 
 
-     maxChunk = 16384;// 16384 = 2^14 roba a che fare con pacchetti SSL, TCP, BHOOO
-     numOfChunks = (int) fb2->len/maxChunk;
+    size_t maxChunk = 16384;// 16384 = 2^14 roba a che fare con pacchetti SSL, TCP, BHOOO
+    int numOfChunks = (int) fb->len/maxChunk;
     for(int i=0; i<numOfChunks+1; i++){
-         size_t test = client.write(&fb2->buf[i*16384], maxChunk);
+         size_t test = client.write(&fb->buf[i*16384], maxChunk);
     }
    
     //delay(9000);
     
-    esp_camera_fb_return(fb2);
-
-  
-  
-  
-      Serial.println("Disconnecting...");
+    esp_camera_fb_return(fb);
+    Serial.println("Disconnecting...");
     client.stop();
-
- 
-    
+  }
+  } 
     /*while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
@@ -209,8 +199,8 @@ client.connect(server, 6156);
     }
 
     client.stop();*/
-  }
 }
+
 
 
 

@@ -84,5 +84,3 @@ if __name__ == '__main__':
         server.listen(100)
         with context.wrap_socket(server, server_side=True) as tls:
             readImage(tls)
-            while 1:
-                continue
