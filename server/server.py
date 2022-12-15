@@ -4,6 +4,7 @@ from ssl import SSLContext, PROTOCOL_TLS_SERVER
 from tkinter import *
 from PIL import ImageTk, Image
 from datetime import datetime
+import netifaces as ni
 
 """
 Creates a window with image.jpg
@@ -68,7 +69,7 @@ def readImage(tls):
 
 
 if __name__ == '__main__':
-    ip = "192.168.137.1"
+    ip = ni.ifaddresses("{76C87566-D4E0-4E03-ACD0-91A0D35A7439}")[ni.AF_INET][0]['addr']
     port = 6156
     context = SSLContext(PROTOCOL_TLS_SERVER)
 
