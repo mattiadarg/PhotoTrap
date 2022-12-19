@@ -1,3 +1,4 @@
+import ssl
 from socket import socket, AF_INET, SOCK_STREAM
 import threading
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
@@ -5,6 +6,7 @@ from tkinter import *
 from PIL import ImageTk, Image
 from datetime import datetime
 import netifaces as ni
+from numpy.lib.user_array import container
 
 """
 Creates a window with image.jpg
@@ -76,8 +78,8 @@ if __name__ == '__main__':
     context.load_cert_chain("../certs/domain.pem", "../certs/domainK.pem")
 
     # client authentication
-    context.load_verify_locations("../certs/client/domainClient.pem")
-
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_verify_locations("../certs/CA/rootCA.pem")
     with socket(AF_INET, SOCK_STREAM) as server:
         server.bind((ip, port))
         server.listen(100)
