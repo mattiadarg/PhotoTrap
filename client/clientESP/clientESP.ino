@@ -1,9 +1,4 @@
 
-/*
-  Wifi secure connection example for ESP32
-  Running on TLS 1.2 using mbedTLS
-*/
-
 #include "esp_camera.h"
 #include "Arduino.h"
 #include "soc/soc.h"           //Disable brownour problems
@@ -44,36 +39,7 @@ const char* root_ca= \
 "JkPm\n" \
      "-----END CERTIFICATE-----\n";
 
-
-//server cert
-const char* nodesdomainpem_test_root_ca= \
-     "-----BEGIN CERTIFICATE-----\n" \
-  "MIID4jCCAsqgAwIBAgIUbenEW900x1q5XiVRI3szwnzNBSkwDQYJKoZIhvcNAQEL\n" \
-"BQAwgYYxCzAJBgNVBAYTAml0MQswCQYDVQQIDAJpdDELMAkGA1UEBwwCaXQxFDAS\n" \
-"BgNVBAoMC2V4YW1wbGUub3JnMRQwEgYDVQQLDAtleGFtcGxlLm9yZzEUMBIGA1UE\n" \
-"AwwLZXhhbXBsZS5vcmcxGzAZBgkqhkiG9w0BCQEWDGdhQGdtYWlsLmNvbTAeFw0y\n" \
-"MjEyMDkyMDU0MzlaFw0yMzEyMDkyMDU0MzlaMIGGMQswCQYDVQQGEwJpdDELMAkG\n" \
-"A1UECAwCaXQxCzAJBgNVBAcMAml0MRQwEgYDVQQKDAtleGFtcGxlLm9yZzEUMBIG\n" \
-"A1UECwwLZXhhbXBsZS5vcmcxFDASBgNVBAMMC2V4YW1wbGUub3JnMRswGQYJKoZI\n" \
-"hvcNAQkBFgxnYUBnbWFpbC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\n" \
-"AoIBAQC8/ZiExCt3m9vcD3iRGINWysb6WuvTHMB+sI59cxBG2jUY2mOUiRNeTOKU\n" \
-"8IKNna3fqdBADQIzIMsXERKh1i7rGP8MoxOzblB6s3kNw8+7ukUrxi/8RBEjMZDD\n" \
-"6hS1w4Ar/NUfUz22AFrPEno00NqSLEk9/4jeaEvyFMEO0S1L0TmhmV/E/21APwm8\n" \
-"KZB0AL7MJLQP7j4iDFg37OoULq7uTexaqRvPofvDa040LTRC9r8NkAJXxhaTPgGv\n" \
-"glIJW/dkFQ7O67zn2+5kdLb6uqugk1AykZXZWnrjRnLswLl7xwdJp2vU8k1+HtCy\n" \
-"R/2hFDWVP4VVVi+OsNm1fJr1Yk9nAgMBAAGjRjBEMB8GA1UdIwQYMBaAFFZznupu\n" \
-"uIjUbe5FDjRvT3XdruuQMAkGA1UdEwQCMAAwFgYDVR0RBA8wDYILZXhhbXBsZS5v\n" \
-"cmcwDQYJKoZIhvcNAQELBQADggEBADAORO3n5PSTvYN06oe1L2pnXO0XyD1bWyrU\n" \
-"QEdxlu1CQvj3g7YNztKfwQ8tcCFKK1JkRboZ8GPVJIlw/MSxJha7pLy69Y68Wtgz\n" \
-"fzJsHYcMPHEtjXnRVsbfYKF6vYBCUUvw6QGGsc07NsNZ//jPt2WUzTY8XvG/CFD7\n" \
-"rJbPjeridcll5e9mSBiBxhSIs4/4cgwHbhXhHD4pPMuk1XB6Yb1xx7P7T2+2mNg2\n" \
-"6knD8QoS6u1StfwVgkGNXrocqfam1/dK8UOwiqfQ+6WWA8LEVAr3ABS3zRTJNkXx\n" \
-"bKSKBJAdqSRJ8aapbpKKL4CjdZu1+pu5uFR+ZYHo+73790OdVJY=\n" \
-     "-----END CERTIFICATE-----\n";
-
-
-// You can use x.509 client certificates if you want
-const char* test_client_key = \
+const char* client_key = \
   "-----BEGIN RSA PRIVATE KEY-----\n" \
 "MIIEpQIBAAKCAQEA21VzTHsxzVYiJyzXp1nUXV9KJPPa0zxLGXi1u7X+JSroHby5\n" \
 "gpckZRfcZ8A6QmiU6oSV7Kw/LvGR0VjuFrPmyq2UY35c67jcuFgtqr0lcNueFFZE\n" \
@@ -104,7 +70,7 @@ const char* test_client_key = \
 
 
 
-const char* test_client_cert = \
+const char* client_cert = \
 "-----BEGIN CERTIFICATE-----\n" \
 "MIID1jCCAr6gAwIBAgIUE7dBt+qr7xJqsGNjxeQZN0N3EjkwDQYJKoZIhvcNAQEL\n" \
 "BQAwgYYxCzAJBgNVBAYTAml0MQswCQYDVQQIDAJpdDELMAkGA1UEBwwCaXQxFDAS\n" \
@@ -140,99 +106,51 @@ const char* hostname = "example.org"; //hostname for certs Common Name
 WiFiClientSecure client(hostname);
 
 void setup() {
-  Serial.begin(115200);
-  delay(100);
-
-  /*Da chiamare se la password del wifi cambia*/
+  pinMode(4,OUTPUT);
+  digitalWrite(4,HIGH);
+  //take photo
+  setupCamera();
+  startCamera();
+  camera_fb_t * fb = takePicture(false);
+  
+  /*save a new WiFi passwd */
   //writePasswd("a(587J25");
   
   //WiFi Connect
   String passwd = getWiFiPasswd();
   WiFi.begin(ssid,passwd.c_str());
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
     delay(1000);
   }
-  Serial.println("Connected to WiFi");
+  
 
  
   //Authentication
   client.setCACert(root_ca);
-  client.setCertificate(test_client_cert); // for client verification
-  client.setPrivateKey(test_client_key);  // for client verification
+  client.setCertificate(client_cert); // for client verification
+  client.setPrivateKey(client_key);  // for client verification
 
 
-  if (!client.connect(WiFi.gatewayIP(), 6156))
-    Serial.println("Connection to server failed!");
-  else {
-    Serial.println("Connected to server!");
-    
-    setupCamera();
-    startCamera();
-    
-    camera_fb_t * fb = takePicture(false);
-
+  if (!client.connect(WiFi.gatewayIP(), 6156)){
+    //Serial.println("Connection to server failed!");
+  }else {
+    //send photo lenght to server
     client.println(fb->len);
-   
 
-
-    size_t maxChunk = 16384;// 16384 = 2^14 roba a che fare con pacchetti SSL, TCP, BHOOO
+    //send photo to server
+    size_t maxChunk = 16384;// 16384 = 2^14 TLS max record lenght
     int numOfChunks = (int) fb->len/maxChunk;
     for(int i=0; i<numOfChunks+1; i++){
          size_t test = client.write(&fb->buf[i*16384], maxChunk);
     }
-   
-    //delay(9000);
-    
-    esp_camera_fb_return(fb);
-    Serial.println("Disconnecting...");
-    client.stop();
   }
-  delay(10000);
-
-  for(int i=0; i<10; i++){
-    delay(2000);
-  if (!client.connect(WiFi.gatewayIP(), 6156))
-    Serial.println("Connection to server failed!");
-  else {
-    Serial.println("Connected to server!");
-    
-   
-    camera_fb_t * fb = takePicture(false);
-
-    client.println(fb->len);
-   
-
-
-    size_t maxChunk = 16384;// 16384 = 2^14 roba a che fare con pacchetti SSL, TCP, BHOOO
-    int numOfChunks = (int) fb->len/maxChunk;
-    for(int i=0; i<numOfChunks+1; i++){
-         size_t test = client.write(&fb->buf[i*16384], maxChunk);
-    }
-   
-    //delay(9000);
-    
-    esp_camera_fb_return(fb);
-    Serial.println("Disconnecting...");
-    client.stop();
-  }
-  } 
-    /*while (client.connected()) {
-      String line = client.readStringUntil('\n');
-      if (line == "\r") {
-        Serial.println("headers received");
-        break;
-      }
-    }*/
   
-    // if there are incoming bytes available
-    // from the server, read them and print them:
-   /* while (client.available()) {
-      char c = client.read();
-      Serial.write(c);
-    }
-
-    client.stop();*/
+  client.stop();
+  WiFi.disconnect();
+  esp_camera_fb_return(fb); 
+  delay(5000);//for PIR buffer
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_2,HIGH);
+  esp_deep_sleep_start();
 }
 
 
@@ -240,5 +158,4 @@ void setup() {
 
 
 void loop() {
-  // do nothing
 }
