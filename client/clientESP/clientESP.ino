@@ -106,12 +106,10 @@ const char* hostname = "example.org"; //hostname for certs Common Name
 WiFiClientSecure client(hostname);
 
 void setup() {
-  pinMode(4,OUTPUT);
-  digitalWrite(4,HIGH);
   //take photo
   setupCamera();
   startCamera();
-  camera_fb_t * fb = takePicture(false);
+  camera_fb_t * fb = takePicture(true);
   
   /*save a new WiFi passwd */
   //writePasswd("a(587J25");
