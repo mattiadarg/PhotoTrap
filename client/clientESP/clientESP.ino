@@ -106,9 +106,12 @@ const char* hostname = "example.org"; //hostname for certs Common Name
 WiFiClientSecure client(hostname);
 
 void setup() {
-  //take photo
+  Serial.begin(115200);
   setupCamera();
   startCamera();
+ 
+  //take photo
+  
   camera_fb_t * fb = takePicture(true);
   
   /*save a new WiFi passwd */
@@ -134,13 +137,27 @@ void setup() {
   }else {
     //send photo lenght to server
     client.println(fb->len);
-
+    int lenght = fb->len;
+    Serial.print("lenght:");
+    Serial.println(lenght);
     //send photo to server
     size_t maxChunk = 16384;// 16384 = 2^14 TLS max record lenght
     int numOfChunks = (int) fb->len/maxChunk;
-    for(int i=0; i<numOfChunks+1; i++){
+    for(int i=0; i<numOfChunks; i++){
          size_t test = client.write(&fb->buf[i*16384], maxChunk);
+         lenght -= maxChunk;
     }
+
+    Serial.print("lenght:");
+    Serial.println(lenght);
+    size_t test = client.write(&fb->buf[numOfChunks*16384], lenght);
+
+    client.flush();
+   // client.println();
+    
+    Serial.println(test);
+
+    delay(9000);
   }
   
   client.stop();

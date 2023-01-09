@@ -15,7 +15,7 @@ Time of update: 5sec
 
 
 def callback(panel):
-    print("sto nella callback")
+    # print("sto nella callback")
     img2 = ImageTk.PhotoImage(Image.open("image.jpg"))
     panel.configure(image=img2)
     panel.image = img2
@@ -33,7 +33,7 @@ def createWindow():
         root.mainloop()
     except Exception as e:
         print("Thread killed")
-    # qui c'era callback
+
 
 """
 Writes data in image.jpg
@@ -41,32 +41,49 @@ Writes data in image.jpg
 
 
 def writeImage(data):
+    from datetime import datetime
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print("date and time =", dt_string)
+    newFile = open(dt_string.replace(":", "_").replace(" ", "_").replace("/", "_") + "image.jpg", "wb")
+    newFile.write(data)
+    newFile.flush()
+    newFile.close()
     newFile = open("image.jpg", "wb")
     newFile.write(data)
     newFile.flush()
     newFile.close()
 
 
-def readImage(tls):
-    connection, address = tls.accept()
+def readImage(tls_arg):
+    connection, address = tls_arg.accept()
     print(f'Connected by {address}\n')
-    fbLen = int(connection.recv(6).decode("utf-8"))
+    bho = connection.recv(6)
+    print(":::::", bho)
+    bho1 = bho.decode("utf-8")
+    print(":::::",bho1)
+    fbLen = int(bho1)
     print(fbLen)
-
     # remove \r\n
     connection.recv(2)
-
+    print("qui2")
     data = bytearray()
+
     maxChunk = 16384
     numOfChunks = int(fbLen / maxChunk)
-    for i in range(0, numOfChunks + 1):
+    print("numOfChunks: ", numOfChunks)
+    for i in range(0, numOfChunks+1):
+        print(i)
         data.extend(connection.recv(maxChunk))
+
+
+
 
     writeImage(data)
     data.clear()
     connection.close()
-
-    threading.Timer(0.1, readImage, [tls]).start()
+    #tls_arg.close()
+    threading.Timer(0.1, readImage, [tls_arg]).start()
     createWindow()
 
 
@@ -83,5 +100,4 @@ if __name__ == '__main__':
     with socket(AF_INET, SOCK_STREAM) as server:
         server.bind((ip, port))
         server.listen(100)
-        with context.wrap_socket(server, server_side=True) as tls:
-            readImage(tls)
+        readImage(context.wrap_socket(server, server_side=True))
