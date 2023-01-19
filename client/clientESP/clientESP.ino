@@ -97,15 +97,11 @@ const char* client_cert = \
 
 
 
-
-
-
-
 const char* ssid     = "LAPTOP-QF1B0J7V 3878";     //name of wifi network
 const char* hostname = "example.org"; //hostname for certs Common Name 
 WiFiClientSecure client(hostname);
-
 void setup() {
+  pinMode(GPIO_NUM_2,INPUT);
   Serial.begin(115200);
   setupCamera();
   startCamera();
@@ -113,14 +109,16 @@ void setup() {
   //take photo
   
   camera_fb_t * fb = takePicture(true);
-  
+
   /*save a new WiFi passwd */
-  //writePasswd("a(587J25");
+  writePasswd("a(587J25");
   
   //WiFi Connect
   String passwd = getWiFiPasswd();
+  Serial.println(passwd.c_str());
   WiFi.begin(ssid,passwd.c_str());
   while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
     delay(1000);
   }
   
@@ -130,10 +128,10 @@ void setup() {
   client.setCACert(root_ca);
   client.setCertificate(client_cert); // for client verification
   client.setPrivateKey(client_key);  // for client verification
-
+  Serial.println("set cert");
 
   if (!client.connect(WiFi.gatewayIP(), 6156)){
-    //Serial.println("Connection to server failed!");
+    Serial.println("Connection to server failed!");
   }else {
     //send photo lenght to server
     client.println(fb->len);
@@ -162,15 +160,11 @@ void setup() {
   
   client.stop();
   WiFi.disconnect();
+  Serial.println("stop");
   esp_camera_fb_return(fb); 
   delay(5000);//for PIR buffer
+  Serial.println("sleep");
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_2,HIGH);
   esp_deep_sleep_start();
 }
-
-
-
-
-
-void loop() {
-}
+void loop() {}

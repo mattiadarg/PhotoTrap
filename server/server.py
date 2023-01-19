@@ -58,11 +58,8 @@ def writeImage(data):
 def readImage(tls_arg):
     connection, address = tls_arg.accept()
     print(f'Connected by {address}\n')
-    bho = connection.recv(6)
-    print(":::::", bho)
-    bho1 = bho.decode("utf-8")
-    print(":::::",bho1)
-    fbLen = int(bho1)
+
+    fbLen = int(connection.recv(6).decode("utf-8"))
     print(fbLen)
     # remove \r\n
     connection.recv(2)
